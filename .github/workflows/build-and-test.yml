@@ -2,13 +2,14 @@ name: Build and Test Docker
 on: [push]
 env:
   CI_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gollum:${{ github.sha }}
+  DEPLOY_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gollum:latest
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
-      - name: Login to Github container registry
+      - name: Login
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -42,7 +43,7 @@ jobs:
     steps:
       - name: Check Out Repo 
         uses: actions/checkout@v2
-      - name: Login to Github container registry
+      - name: Login
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -51,3 +52,19 @@ jobs:
         run: docker pull ${{ env.CI_IMAGE }}
       - name: Run tests
         run: docker run -e CI=true -w /app --entrypoint bundle ${{ env.CI_IMAGE }} exec rake
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: test
+    steps:
+      - name: Login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Pull
+        run: docker pull ${{ env.CI_IMAGE }}
+      - name: Tag
+        run: docker tag ${{ env.CI_IMAGE }} ${{ env.DEPLOY_IMAGE }}
+      - name: Push
+        run: docker push ${{ env.DEPLOY_IMAGE }}
