@@ -1,7 +1,7 @@
 name: Build and Test Docker
 on: [push]
 env:
-  CI_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gollum:dev-${{ github.sha }}
+  CI_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gollum
   DEPLOY_IMAGE: ${{ secrets.DOCKER_HUB_USERNAME }}/gollum:latest
 jobs:
   build:
@@ -31,7 +31,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          push: true
+          push: false
           tags: ${{ env.CI_IMAGE }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
@@ -49,7 +49,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Pull
-        run: docker pull ${{ env.CI_IMAGE }}
+        run: docker pull ${{ env.CI_IMAGE }}@${{ jobs.build.steps.docker_build.outputs.digest }}
       - name: Run tests
         run: docker run -e CI=true -w /app --entrypoint bundle ${{ env.CI_IMAGE }} exec rake
   deploy-on-master:
