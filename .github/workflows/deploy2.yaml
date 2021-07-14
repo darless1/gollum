@@ -1,4 +1,4 @@
-name: Deploy to Dockerhub - Test
+name: Deploy to Dockerhub - Test - 2
 on: 
   workflow_dispatch:
     inputs:
