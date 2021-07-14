@@ -1,10 +1,9 @@
-name: Deploy to Dockerhub
-
+name: Deploy to Dockerhub - Test
 on: 
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: 'Log level HI'     
         required: true
         default: 'warning'
       tags:
