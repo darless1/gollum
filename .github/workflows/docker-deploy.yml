@@ -1,11 +1,11 @@
 name: Deploy docker
 on: [push]
 env:
-  DEPLOY_IMAGE: ${{ secrets.DOCKER_HUB_NAMESPACE }}/gollum:latest
+  DEPLOY_NAME: gollumwiki/gollum:latest
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/master-test' }}
     steps:
       - name: Check Out Repo
         uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ env.CI_IMAGE }}
+          tags: ${{ env.DEPLOY_NAME }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
       - name: Image digest
